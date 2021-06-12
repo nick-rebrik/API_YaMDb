@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class MyUser(AbstractUser):
-    
     class Roles(models.TextChoices):
         USER = 'User'
         MODERATOR = 'Moderator'
@@ -11,27 +10,27 @@ class MyUser(AbstractUser):
 
     first_name = models.CharField(
         max_length=100,
-        verbose_name = 'Имя',
+        verbose_name='Имя',
     )
     last_name = models.CharField(
         max_length=100,
-        verbose_name = 'Фамилия',
+        verbose_name='Фамилия',
     )
     username = models.CharField(
         max_length=100,
-        verbose_name = 'Username',
-        unique = True
+        verbose_name='Username',
+        unique=True
     )
     bio = models.TextField()
     email = models.EmailField(
-        verbose_name= 'Адрес электронной почты',
+        verbose_name='Адрес электронной почты',
         max_length=255,
         unique=True,
     )
     role = models.CharField(
-        max_length = 20,
-        choices = Roles.choices,
-        default = Roles.USER,
+        max_length=20,
+        choices=Roles.choices,
+        default=Roles.USER,
     )
 
 
@@ -75,4 +74,3 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
