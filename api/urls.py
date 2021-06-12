@@ -12,7 +12,7 @@ router_v1.register(
     r'titles/(?P<title_id>[0-9]+)/reviews', ReviewViewSet, basename='Review'
 )
 router_v1.register(
-    r'titles/(?P<title_id>[0-9]+)/reviews/(?P<id>\d+)/comments',
+    r'titles/(?P<title_id>\d+)/reviews/(?P<id>\d+)/comments',
     CommentViewSet, basename='Comment'
 )
 
