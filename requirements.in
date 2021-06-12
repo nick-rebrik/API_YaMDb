@@ -2,3 +2,4 @@ pytest-django
 requests
 django
 djangorestframework
+django-filter

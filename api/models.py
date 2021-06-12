@@ -52,8 +52,8 @@ class Category(models.Model):
     slug = models.SlugField(max_length=30, unique=True)
 
     class Meta:
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
@@ -62,10 +62,9 @@ class Category(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=100, verbose_name='Произведение')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
-                                 null=True, related_name="titles")
-    genre = models.ManyToManyField(Genre, blank=True, related_name="titles")
-    year = models.IntegerField(
-        null=True, verbose_name="Год издания", db_index=True)
+                                 blank=True, null=True, related_name="titles")
+    genre = models.ManyToManyField(Genre, related_name="titles")
+    year = models.IntegerField(verbose_name="Год издания", db_index=True)
     description = models.CharField(max_length=300, null=True)
 
     class Meta:
