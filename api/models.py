@@ -74,3 +74,40 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Reviews(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE,
+                              related_name='reviews')
+    text = models.TextField()
+    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
+                               related_name='reviews')
+    score = models.PositiveSmallIntegerField(verbose_name='Оценка')
+    pub_date = models.DateField(auto_now_add=True,
+                                verbose_name='Дата публикации')
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title_id', 'author'],
+                name='unique_review'),
+        ]
+
+    def __str__(self):
+        return f'{self.text[:50]}...'
+
+
+class Comments(models.Model):
+    review = models.ForeignKey(Reviews, on_delete=models.CASCADE,
+                               related_name='comments')
+    text = models.TextField()
+    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
+                               related_name='comments')
+    pub_date = models.DateField(auto_now_add=True,
+                                verbose_name='Дата публикации')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
