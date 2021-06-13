@@ -1,6 +1,11 @@
+from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import exceptions
 
-from .models import Comments, Reviews, Category, Genre, Title
+from .models import Comments, MyUser, Reviews, Category, Genre, Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -65,3 +70,16 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].required = False
+        self.fields['confirmation code'] = serializers.CharField()
+
+    def validate(self, attrs):
+        attrs.update({'password': attrs['confirmation code']})
+        return super().validate(attrs)
+

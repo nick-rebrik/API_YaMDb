@@ -2,16 +2,17 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
     DestroyModelMixin
-from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.views import TokenViewBase
 
 from .filter import TitleFilter
 from .models import Title, Category, Genre
 from .serializers import ReviewSerializer, CommentSerializer, \
     CategorySerializer, GenreSerializer, TitleCreateSerializer, \
-    TitleListSerializer
+    TitleListSerializer, MyTokenObtainPairSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -74,3 +75,6 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleListSerializer
+
+class MyTokenObtainView(TokenViewBase):
+    serializer_class = MyTokenObtainPairSerializer

@@ -9,17 +9,24 @@ class MyUser(AbstractUser):
         MODERATOR = 'Moderator'
         ADMIN = 'Admin'
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
     username = models.CharField(
         max_length=100,
         verbose_name='Username',
         unique=True
     )
     bio = models.TextField()
+    email = models.EmailField(
+        verbose_name='email',
+        unique=True
+    )
     role = models.CharField(
         max_length=20,
         choices=Roles.choices,
         default=Roles.USER,
     )
+
 
 
 class Genre(models.Model):
