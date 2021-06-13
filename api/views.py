@@ -1,18 +1,19 @@
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
-    DestroyModelMixin
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .filter import TitleFilter
-from .models import Title, Category, Genre
-from .serializers import ReviewSerializer, CommentSerializer, \
-    CategorySerializer, GenreSerializer, TitleCreateSerializer, \
-    TitleListSerializer, MyTokenObtainPairSerializer
+from .models import Category, Genre, Title
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, MyTokenObtainPairSerializer,
+                          ReviewSerializer, TitleCreateSerializer,
+                          TitleListSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -54,13 +55,16 @@ class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
 class CategoryViewSet(CustomMixin):
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
+    pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
+
 
 
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
+    pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
 
@@ -68,6 +72,7 @@ class GenreViewSet(CustomMixin):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('id')
+    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
 
