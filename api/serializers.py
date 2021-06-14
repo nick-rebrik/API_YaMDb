@@ -73,7 +73,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['password'].required = False
@@ -82,4 +81,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         attrs.update({'password': attrs['confirmation code']})
         return super().validate(attrs)
+
+class SendEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email',)
+        model = MyUser
 
