@@ -1,33 +1,35 @@
+
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 # import function for password encyption
 from django.contrib.auth.hashers import make_password
 from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
-    DestroyModelMixin
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.views import TokenViewBase
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
 
 from .filter import TitleFilter
-from .models import Title, Category, Genre, MyUser
-from .serializers import ReviewSerializer, CommentSerializer, \
-    CategorySerializer, GenreSerializer, TitleCreateSerializer, \
-    TitleListSerializer, MyTokenObtainPairSerializer, SendEmailSerializer
+from .models import Title, Review, Category, Genre, MyUser
+from .serializers import (ReviewSerializer, CommentSerializer, 
+    CategorySerializer, GenreSerializer, TitleCreateSerializer, 
+    TitleListSerializer, MyTokenObtainPairSerializer, SendEmailSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
 
 
@@ -35,12 +37,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
-        return title.reviews.all()
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
-        serializer.save(author=self.request.user, title=title)
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        serializer.save(author=self.request.user, review=review)
 
 
 class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
@@ -52,13 +54,16 @@ class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
 class CategoryViewSet(CustomMixin):
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
+    pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
+
 
 
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
+    pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
 
@@ -66,6 +71,7 @@ class GenreViewSet(CustomMixin):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('id')
+    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
 
