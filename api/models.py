@@ -1,4 +1,5 @@
-from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
+from django.contrib.auth.models import AbstractUser, BaseUserManager, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -10,11 +11,13 @@ class MyUser(AbstractUser):
         ADMIN = 'Admin'
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
+    
+    objects = UserManager()
     username = models.CharField(
         max_length=100,
         verbose_name='Username',
-        unique=True
+        #unique=True
     )
     bio = models.TextField()
     email = models.EmailField(
@@ -26,8 +29,6 @@ class MyUser(AbstractUser):
         choices=Roles.choices,
         default=Roles.USER,
     )
-
-
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name='Жанр', unique=True)
