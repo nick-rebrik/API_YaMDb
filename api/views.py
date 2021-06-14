@@ -1,28 +1,27 @@
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
 from django.db.models import Avg
-
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
-    DestroyModelMixin
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 
 from .filter import TitleFilter
-from .models import Title, Category, Genre
-from .serializers import ReviewSerializer, CommentSerializer, \
-    CategorySerializer, GenreSerializer, TitleCreateSerializer, \
-    TitleListSerializer
+from .models import Category, Genre, Review, Title
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleCreateSerializer, TitleListSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
 
 
@@ -30,12 +29,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
-        return title.reviews.all()
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs['id'])
-        serializer.save(author=self.request.user, title=title)
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        serializer.save(author=self.request.user, review=review)
 
 
 class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,

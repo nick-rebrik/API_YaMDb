@@ -1,30 +1,6 @@
 from rest_framework import serializers
 
-from .models import Comments, Reviews, Category, Genre, Title
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Reviews
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Comments
+from .models import Comment, Review, Category, Genre, Title, MyUser
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -65,3 +41,27 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=MyUser.objects.all()
+    )
+
+    class Meta:
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=MyUser.objects.all()
+    )
+
+    class Meta:
+        fields = ['id', 'text', 'author', 'pub_date']
+        model = Comment
