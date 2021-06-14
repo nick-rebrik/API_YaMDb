@@ -70,17 +70,20 @@ class Title(models.Model):
         return self.name
 
 
-class Reviews(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE,
-                              related_name='reviews')
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='reviews'
+    )
     text = models.TextField()
-    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
-                               related_name='reviews')
+    author = models.ForeignKey(
+        MyUser, on_delete=models.CASCADE, related_name='reviews'
+    )
     score = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
-    pub_date = models.DateField(auto_now_add=True,
-                                verbose_name='Дата публикации')
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата публикации', db_index=True
+    )
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -95,17 +98,23 @@ class Reviews(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.text[:50]}...'
+        return self.text[:50]
 
 
-class Comments(models.Model):
-    review = models.ForeignKey(Reviews, on_delete=models.CASCADE,
-                               related_name='comments')
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name='comments'
+    )
     text = models.TextField()
-    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
-                               related_name='comments')
-    pub_date = models.DateField(auto_now_add=True,
-                                verbose_name='Дата публикации')
+    author = models.ForeignKey(
+        MyUser, on_delete=models.CASCADE, related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата публикации', db_index=True
+    )
+
+    def __str__(self):
+        return self.text[:50]
 
     class Meta:
         verbose_name = 'Комментарий'

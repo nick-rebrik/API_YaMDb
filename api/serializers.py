@@ -5,31 +5,7 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import exceptions
 
-from .models import Comments, MyUser, Reviews, Category, Genre, Title
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Reviews
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Comments
+from .models import Comment, Review, Category, Genre, Title, MyUser
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -72,6 +48,30 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
 
 
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=MyUser.objects.all()
+    )
+
+    class Meta:
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=MyUser.objects.all()
+    )
+
+    class Meta:
+        fields = ['id', 'text', 'author', 'pub_date']
+        model = Comment
+
+        
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def __init__(self, *args, **kwargs):
@@ -82,4 +82,5 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         attrs.update({'password': attrs['confirmation code']})
         return super().validate(attrs)
+
 
