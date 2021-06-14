@@ -59,7 +59,6 @@ class CategoryViewSet(CustomMixin):
     lookup_field = 'slug'
 
 
-
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
@@ -79,6 +78,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleListSerializer
+
 
 class MyTokenObtainView(TokenViewBase):
     serializer_class = MyTokenObtainPairSerializer
