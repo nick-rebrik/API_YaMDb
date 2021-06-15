@@ -6,20 +6,28 @@ from django.db import models
 
 class MyUser(AbstractUser):
     class Roles(models.TextChoices):
-        USER = 'User'
-        MODERATOR = 'Moderator'
-        ADMIN = 'Admin'
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
     
     objects = UserManager()
+    first_name = models.CharField(
+        max_length=100,
+        verbose_name='First name',
+        null = True)
+    last_name = models.CharField(
+        max_length=100,
+        verbose_name='Last name',
+        null = True)
     username = models.CharField(
         max_length=100,
         verbose_name='Username',
-        #unique=True
+        unique=True
     )
-    bio = models.TextField()
+    bio = models.TextField(null=True)
     email = models.EmailField(
         verbose_name='email',
         unique=True

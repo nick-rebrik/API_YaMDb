@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObt
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import exceptions
+from rest_framework.validators import UniqueValidator
 
 from .models import Comment, Review, Category, Genre, Title, MyUser
 
@@ -89,3 +90,18 @@ class SendEmailSerializer(serializers.ModelSerializer):
         model = MyUser
 
 
+class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(default=None)
+    last_name = serializers.CharField(default=None)
+    email = serializers.EmailField( 
+        validators=[UniqueValidator(queryset=MyUser.objects.all())]
+    )
+    bio = serializers.CharField(default=None)
+    role = serializers.ChoiceField(
+        default ='user', 
+        choices=(MyUser.Roles)
+    )
+    class Meta:
+        model = MyUser
+        exclude = ('password', )
+        #lookup_field = 'username'

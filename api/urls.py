@@ -1,10 +1,14 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,)
 from .views import CommentViewSet, ReviewViewSet, TitlesViewSet, GenreViewSet, \
-    CategoryViewSet, SendEmailView, MyTokenObtainView
+    CategoryViewSet, SendEmailView, MyTokenObtainView, UserViewSet
 
 router_v1 = DefaultRouter()
+router_v1.register("users", UserViewSet, basename='User')
+
 router_v1.register("titles", TitlesViewSet, basename='Title')
 router_v1.register("genres", GenreViewSet, basename='Genre')
 router_v1.register("categories", CategoryViewSet, basename='Category')
@@ -20,6 +24,6 @@ urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('auth/email/', SendEmailView.as_view(),
     name ='obtain_confirmation_code'),
-    path('auth/token/', MyTokenObtainView.as_view(),
+    path('auth/token/',  TokenObtainPairView.as_view(),
     name='obtain_token'),
 ]
