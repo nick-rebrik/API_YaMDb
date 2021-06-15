@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from django.contrib.auth.models import AbstractUser, BaseUserManager, \
-    UserManager
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 

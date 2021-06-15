@@ -1,16 +1,12 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework_simplejwt.serializers import TokenObtainSerializer, \
-    TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import exceptions
 from rest_framework.validators import UniqueValidator
-
-User = get_user_model()
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Comment, Review, Category, Genre, Title, MyUser
+
+
+User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
