@@ -1,9 +1,14 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import exceptions
+
+
+User = get_user_model()
+
 
 from .models import Comment, Review, Category, Genre, Title, MyUser
 
@@ -52,19 +57,25 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-        default=MyUser.objects.all()
+        default=serializers.CurrentUserDefault()
     )
 
     class Meta:
         fields = ['id', 'text', 'author', 'score', 'pub_date']
         model = Review
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=Review.objects.all(),
+        #         fields=['title', 'author']
+        #     )
+        # ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-        default=MyUser.objects.all()
+        default=serializers.CurrentUserDefault()
     )
 
     class Meta:
