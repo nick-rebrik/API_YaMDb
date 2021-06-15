@@ -12,13 +12,21 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 
 from .filter import TitleFilter
+from .serializers import (ReviewSerializer, CommentSerializer, 
+    CategorySerializer, GenreSerializer, TitleCreateSerializer, 
+    TitleListSerializer, MyTokenObtainPairSerializer, SendEmailSerializer,
+    UserSerializer)
 from .models import Category, Genre, MyUser, Review, Title
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
                           TitleCreateSerializer, TitleListSerializer)
+from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -67,7 +75,7 @@ class GenreViewSet(CustomMixin):
     pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
-
+    permission_classes = [IsAuthenticatedOrReadOnly,]
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
@@ -75,7 +83,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
-
+    permission_classes = [IsAuthenticated,]
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
@@ -91,17 +99,36 @@ class SendEmailView(APIView):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid():
             confirmation_code = MyUser.objects.make_random_password()
+        
             serializer.save(
                 email=self.request.data['email'],
                 password=make_password(confirmation_code),
             )
-            send_mail(
+            
+            send_mail( 
                 'Confirmation code email',
-                confirmation_code,
-                'from@example.com',
+                'confirmation code: {}'.format(confirmation_code),
+                'from@example.com', 
                 [self.request.data['email']],
                 fail_silently=False,
             )
             return Response(serializer.validated_data,
                             status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = MyUser.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ['username']
+    lookup_field = "username"
+    permission_classes = [IsAdminOrReadOnly,]
+    
+    def get_queryset(self):
+        if self.kwargs.get ('username', None) == 'me':
+            self.kwargs['username'] = self.request.user.username
+            return MyUser.objects.filter (id =self.request.user.id )
+        elif self.kwargs.get('username', None):
+            return MyUser.objects.filter (username=self.kwargs['username'])
+        return MyUser.objects.all()
