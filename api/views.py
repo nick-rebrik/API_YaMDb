@@ -1,27 +1,32 @@
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
 # import function for password encyption
 from django.contrib.auth.hashers import make_password
-from rest_framework import viewsets, status
+from django.core.mail import send_mail
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
-    DestroyModelMixin
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 
 from .filter import TitleFilter
-from .models import Title, Category, Genre, MyUser
 from .serializers import (ReviewSerializer, CommentSerializer, 
     CategorySerializer, GenreSerializer, TitleCreateSerializer, 
     TitleListSerializer, MyTokenObtainPairSerializer, SendEmailSerializer,
     UserSerializer)
+from .models import Category, Genre, MyUser, Review, Title
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, MyTokenObtainPairSerializer,
+                          ReviewSerializer, SendEmailSerializer,
+                          TitleCreateSerializer, TitleListSerializer)
 from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -88,6 +93,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class MyTokenObtainView(TokenViewBase):
     serializer_class = MyTokenObtainPairSerializer
 
+
 class SendEmailView(APIView):
     def post(self, request, format=None):
         serializer = SendEmailSerializer(data=request.data)
@@ -95,8 +101,8 @@ class SendEmailView(APIView):
             confirmation_code = MyUser.objects.make_random_password()
         
             serializer.save(
-                email=self.request.data['email'], 
-                password = make_password(confirmation_code),
+                email=self.request.data['email'],
+                password=make_password(confirmation_code),
             )
             
             send_mail( 
@@ -106,7 +112,8 @@ class SendEmailView(APIView):
                 [self.request.data['email']],
                 fail_silently=False,
             )
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+            return Response(serializer.validated_data,
+                            status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

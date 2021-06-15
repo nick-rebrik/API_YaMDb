@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser, BaseUserManager, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -37,6 +38,10 @@ class MyUser(AbstractUser):
         choices=Roles.choices,
         default=Roles.USER,
     )
+
+
+User = get_user_model()
+
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name='Жанр', unique=True)
@@ -85,7 +90,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='reviews'
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)]
@@ -116,7 +121,7 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='comments'
+        User, on_delete=models.CASCADE, related_name='comments'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации', db_index=True
