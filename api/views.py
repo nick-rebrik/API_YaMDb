@@ -9,24 +9,20 @@ from rest_framework.filters import SearchFilter
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
 
 from .filter import TitleFilter
-from .serializers import (ReviewSerializer, CommentSerializer, 
-    CategorySerializer, GenreSerializer, TitleCreateSerializer, 
-    TitleListSerializer, MyTokenObtainPairSerializer, SendEmailSerializer,
-    UserSerializer)
 from .models import Category, Genre, MyUser, Review, Title
+from .permissions import IsAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
                           TitleCreateSerializer, TitleListSerializer)
-from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
-
+from .serializers import (UserSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -75,7 +71,8 @@ class GenreViewSet(CustomMixin):
     pagination_class = PageNumberPagination
     search_fields = ['name']
     lookup_field = 'slug'
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
+
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
@@ -83,7 +80,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
+
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
@@ -99,16 +97,16 @@ class SendEmailView(APIView):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid():
             confirmation_code = MyUser.objects.make_random_password()
-        
+
             serializer.save(
                 email=self.request.data['email'],
                 password=make_password(confirmation_code),
             )
-            
-            send_mail( 
+
+            send_mail(
                 'Confirmation code email',
                 'confirmation code: {}'.format(confirmation_code),
-                'from@example.com', 
+                'from@example.com',
                 [self.request.data['email']],
                 fail_silently=False,
             )
@@ -123,12 +121,12 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ['username']
     lookup_field = "username"
-    permission_classes = [IsAdminOrReadOnly,]
-    
+    permission_classes = [IsAdminOrReadOnly, ]
+
     def get_queryset(self):
-        if self.kwargs.get ('username', None) == 'me':
+        if self.kwargs.get('username', None) == 'me':
             self.kwargs['username'] = self.request.user.username
-            return MyUser.objects.filter (id =self.request.user.id )
+            return MyUser.objects.filter(id=self.request.user.id)
         elif self.kwargs.get('username', None):
-            return MyUser.objects.filter (username=self.kwargs['username'])
+            return MyUser.objects.filter(username=self.kwargs['username'])
         return MyUser.objects.all()

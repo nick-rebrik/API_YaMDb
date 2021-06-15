@@ -1,17 +1,12 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import exceptions
 from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from .models import Comment, Review, Category, Genre, Title, MyUser
 
 
 User = get_user_model()
-
-
-from .models import Comment, Review, Category, Genre, Title, MyUser
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -83,7 +78,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'author', 'pub_date']
         model = Comment
 
-        
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,15 +99,16 @@ class SendEmailSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(default=None)
     last_name = serializers.CharField(default=None)
-    email = serializers.EmailField( 
+    email = serializers.EmailField(
         validators=[UniqueValidator(queryset=MyUser.objects.all())]
     )
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
-        default ='user', 
-        choices=(MyUser.Roles)
+        default='user',
+        choices=MyUser.Roles
     )
+
     class Meta:
         model = MyUser
-        exclude = ('password', )
-        #lookup_field = 'username'
+        exclude = ('password',)
+        # lookup_field = 'username'
