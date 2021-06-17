@@ -17,11 +17,12 @@ from rest_framework_simplejwt.views import TokenViewBase
 
 from .filter import TitleFilter
 from .models import Category, Genre, MyUser, Review, Title
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
-                          TitleCreateSerializer, TitleListSerializer)
-from .serializers import (UserSerializer)
+                          TitleCreateSerializer, TitleListSerializer,
+                          UserSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
