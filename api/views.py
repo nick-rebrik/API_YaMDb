@@ -65,6 +65,7 @@ class CategoryViewSet(CustomMixin):
     lookup_field = 'slug'
     permission_classes = [IsAuthenticatedOrReadOnly, ]
 
+
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
@@ -118,8 +119,8 @@ class SendEmailView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
-    #filter_backends = (SearchFilter,)
-    #search_fields = ['username']
+    # filter_backends = (SearchFilter,)
+    # search_fields = ['username']
     lookup_field = "username"
     permission_classes = [IsAuthenticated, ]
     '''
