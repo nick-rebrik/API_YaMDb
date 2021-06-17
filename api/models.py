@@ -54,7 +54,7 @@ class MyUser(AbstractUser):
     )
 
 
-MyUser = get_user_model()
+User = get_user_model()
 
 
 class Genre(models.Model):
@@ -104,7 +104,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='reviews'
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)]
@@ -135,7 +135,7 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='comments'
+        User, on_delete=models.CASCADE, related_name='comments'
 
     )
     pub_date = models.DateTimeField(
