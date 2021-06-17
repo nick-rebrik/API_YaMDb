@@ -23,8 +23,8 @@ router_v1.register(
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
-    path('auth/email/', SendEmailView.as_view(),
+    path('v1/auth/email/', SendEmailView.as_view(),
          name='obtain_confirmation_code'),
-    path('auth/token/', TokenObtainPairView.as_view(),
+    path('v1/auth/token/', TokenObtainPairView.as_view(),
          name='obtain_token'),
 ]

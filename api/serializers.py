@@ -3,8 +3,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Comment, Review, Category, Genre, Title, MyUser
-
+from .models import Category, Comment, Genre, MyUser, Review, Title
 
 User = get_user_model()
 
