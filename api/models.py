@@ -37,9 +37,22 @@ class MyUser(AbstractUser):
         choices=Roles.choices,
         default=Roles.USER,
     )
+    
+    is_superuser = models.CharField(
+        max_length=20,
+        null = True,
+    )
+    is_staff = models.CharField(
+        max_length=20,
+        null = True,
+    )
+    #is_active = models.CharField(
+        #null =True
+    #)
+    date_joined = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата регистрации', db_index=True
+    )
 
-
-User = get_user_model()
 
 
 class Genre(models.Model):
@@ -66,13 +79,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+MyUser = get_user_model()
 
 class Title(models.Model):
     name = models.CharField(max_length=100, verbose_name='Произведение')
+    year = models.IntegerField(verbose_name="Год издания", db_index=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  blank=True, null=True, related_name="titles")
     genre = models.ManyToManyField(Genre, related_name="titles")
-    year = models.IntegerField(verbose_name="Год издания", db_index=True)
     description = models.CharField(max_length=300, null=True)
 
     class Meta:
@@ -89,7 +103,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews'
+        MyUser, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)]
@@ -120,8 +134,9 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
-    )
+        MyUser, on_delete=models.CASCADE, related_name='comments'
+ 
+   )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации', db_index=True
     )
