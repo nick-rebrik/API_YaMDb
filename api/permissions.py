@@ -12,8 +12,7 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 class IsAdmin(permissions.BasePermission):
    
     def has_permission(self, request, view):
-        return (request.user.role == MyUser.Roles.USER)
+        return request.user.role == MyUser.Roles.USER
 
     def has_object_permission(self, request, view, obj):
         return request.user.role == MyUser.Roles.ADMIN
-
