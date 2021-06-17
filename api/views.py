@@ -10,15 +10,14 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly,
-                                        AllowAny)
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .filter import TitleFilter
 from .models import Category, Genre, MyUser, Review, Title
-from .permissions import IsAdmin
+from .permissions import IsAdminOrModerator, IsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
@@ -29,11 +28,18 @@ from .serializers import (UserSerializer)
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
+    permission_classes = [IsAdminOrModerator, ]
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
+
+    def get_permissions(self):
+        if self.action == 'post':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminOrModerator]
+        return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -43,6 +49,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
+    permission_classes = [IsAdminOrModerator, ]
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
@@ -63,6 +70,7 @@ class CategoryViewSet(CustomMixin):
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
     permission_classes = [IsAuthenticatedOrReadOnly, ]
@@ -71,6 +79,7 @@ class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
     pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
     permission_classes = [IsAuthenticatedOrReadOnly, ]
@@ -123,13 +132,13 @@ class UserViewSet(viewsets.ModelViewSet):
     #filter_backends = (SearchFilter,)
     #search_fields = ['username']
     lookup_field = "username"
-    permission_classes = [IsAuthenticated, ]
-    '''
+    permission_classes = [IsAuthenticated, IsAdmin]
+    
     def get_queryset(self):
         if self.kwargs.get('username', None) == 'me':
-            self.kwargs['username'] = self.request.user.username
+            #self.kwargs['username'] = self.request.user.username
             return MyUser.objects.filter(id=self.request.user.id)
         elif self.kwargs.get('username', None):
             return MyUser.objects.filter(username=self.kwargs['username'])
         return MyUser.objects.all()
-    '''
+    

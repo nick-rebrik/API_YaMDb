@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Comment, Review, Category, Genre, Title, MyUser
@@ -59,12 +59,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['id', 'text', 'author', 'score', 'pub_date']
         model = Review
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=Review.objects.all(),
-        #         fields=['title', 'author']
-        #     )
-        # ]
+        validators = [
+             UniqueTogetherValidator(
+                 queryset=Review.objects.all(),
+                 fields=['title', 'author']
+             )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
