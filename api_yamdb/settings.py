@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'YADB.sqlite3'),
     }
 }
 
@@ -121,14 +121,15 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 # REST
 SIMPLE_JWT = {
    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
-   'AUTH_HEADER_TYPES': ('Bearer',),
+   #'AUTH_HEADER_TYPES': ('Bearer',),
 } 
 REST_FRAMEWORK = {
+     'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated', 
+    ],
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-        ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
