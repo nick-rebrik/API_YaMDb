@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
@@ -42,6 +43,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        if title.reviews.filter(author=self.request.user).exists():
+            raise ValidationError(
+                'Вы уже оставили отзыв на данное произведение'
+            )
         serializer.save(author=self.request.user, title=title)
 
 
@@ -68,7 +73,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
                   viewsets.GenericViewSet):
-    # так тоже должно работать
     pass
 
 
@@ -129,7 +133,7 @@ class MyTokenObtainView(TokenViewBase):
 
 
 class SendEmailView(APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid():
             confirmation_code = MyUser.objects.make_random_password()

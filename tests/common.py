@@ -22,7 +22,6 @@ def create_users_api(user_client):
     user_client.post('/api/v1/users/', data=data)
     moderator = get_user_model().objects.get(username=data['username'])
     return user, moderator
-    print (user)
 
 
 def auth_client(user):
