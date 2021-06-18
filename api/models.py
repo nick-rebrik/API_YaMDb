@@ -39,24 +39,9 @@ class MyUser(AbstractUser):
         default=Roles.USER,
     )
 
-    '''
-    is_superuser = models.CharField(
-        max_length=20,
-        null=True,
-    )
-    is_staff = models.CharField(
-        max_length=20,
-        null=True,
-    )
+    class Meta:
+        ordering = ['id']
 
-    is_active = models.CharField(
-        null =True
-    )
-
-    date_joined = models.DateTimeField(
-        auto_now_add=True, verbose_name='Дата регистрации', db_index=True
-    )
-    '''
 
 User = get_user_model()
 
@@ -111,7 +96,7 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)]
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации', db_index=True
@@ -120,6 +105,7 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ['id']
         constraints = [
             models.CheckConstraint(
                 check=models.Q(score__range=(0, 10)), name='valid_rate'
@@ -152,3 +138,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ['id']
