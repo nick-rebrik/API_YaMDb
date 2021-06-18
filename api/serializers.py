@@ -55,9 +55,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-
+    title = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='name',
+        default=serializers.CurrentUserDefault()
+    )
     class Meta:
-        fields = ['id', 'text', 'author', 'score', 'pub_date']
+        fields = ['id', 'text', 'title', 'author', 'score', 'pub_date']
         model = Review
         validators = [
              UniqueTogetherValidator(
