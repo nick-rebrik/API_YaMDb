@@ -10,8 +10,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly,
-                                        AllowAny)
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
@@ -89,6 +88,7 @@ class CategoryViewSet(CustomMixin):
         return [permission() for permission in permission_classes]
 
 
+
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
@@ -154,8 +154,8 @@ class SendEmailView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
-    #filter_backends = (SearchFilter,)
-    #search_fields = ['username']
+    # filter_backends = (SearchFilter,)
+    # search_fields = ['username']
     lookup_field = "username"
     permission_classes = [IsAuthenticated, IsAdmin]
     
@@ -179,5 +179,3 @@ class UserViewSet(viewsets.ModelViewSet):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        
-    
