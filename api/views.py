@@ -10,14 +10,16 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+                                        IsAuthenticatedOrReadOnly,
+                                        AllowAny)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.decorators import action
 
 from .filter import TitleFilter
 from .models import Category, Genre, MyUser, Review, Title
-from .permissions import IsAdminOrModerator, IsAdmin
+from .permissions import IsAdminOrModerator, IsAdmin, IsSafeMethodOrIsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
@@ -28,14 +30,13 @@ from .serializers import (UserSerializer)
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAdminOrModerator, ]
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
 
     def get_permissions(self):
-        if self.action == 'post':
+        if self.request.method == 'POST':
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsAdminOrModerator]
@@ -59,6 +60,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(author=self.request.user, review=review)
 
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminOrModerator]
+        return [permission() for permission in permission_classes]
 
 class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
                   viewsets.GenericViewSet):
@@ -73,7 +80,14 @@ class CategoryViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
+        return [permission() for permission in permission_classes]
+
 
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
@@ -82,7 +96,13 @@ class GenreViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
+        return [permission() for permission in permission_classes]
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -91,13 +111,18 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleListSerializer
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
+        return [permission() for permission in permission_classes]
 
 class MyTokenObtainView(TokenViewBase):
     serializer_class = MyTokenObtainPairSerializer
@@ -134,11 +159,25 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     permission_classes = [IsAuthenticated, IsAdmin]
     
-    def get_queryset(self):
-        if self.kwargs.get('username', None) == 'me':
-            #self.kwargs['username'] = self.request.user.username
-            return MyUser.objects.filter(id=self.request.user.id)
-        elif self.kwargs.get('username', None):
-            return MyUser.objects.filter(username=self.kwargs['username'])
-        return MyUser.objects.all()
+    @action(detail=False,
+            methods=['get', 'patch'],
+            permission_classes = [IsAuthenticated],
+            url_name= 'me')
+    def me(self, request):
+        me = get_object_or_404(MyUser, id=self.request.user.id)
+        if self.request.method =='GET':
+            serializer = self.get_serializer(me)
+            return Response(serializer.data,
+                            status=status.HTTP_200_OK)
+        else:
+            serializer = self.get_serializer(me, 
+                data=request.data, partial=True)
+            if serializer.is_valid():
+                self.perform_update(serializer)
+                return Response(serializer.data,
+                        status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        
     
