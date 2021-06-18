@@ -27,12 +27,10 @@ if __name__ == '__main__':
             ).format(table=args.table, headers=headers, values=values)
             if line != 1:
                 try:
-                    if '"' in row[0]:
-                        new = re.split(r",(?!\s)", row[0])
-                        print(new)
-                        cursor.execute(insert_records, new)
+                    #if '"' in row[0]:
+                        #new = re.split(r",(?!\s)", row[0])
+                    cursor.execute(insert_records, row)
                 except sqlite3.IntegrityError as err1:
-                    raise 
                     FORMAT = (
                         '\033[1;31m' + 'Похоже на то, что в строках с этим pk '
                         'какие-то данные уже есть.' + '\033[0m' + '\nОшибка:'

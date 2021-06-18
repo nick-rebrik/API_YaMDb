@@ -4,7 +4,7 @@ import pytest
 @pytest.fixture
 def admin(django_user_model):
     return django_user_model.objects.create_superuser(
-        username='TestUser', email='admin@yamdb.fake', password='1234567'
+        username='NNNTestUser', email='NNNadmin@yamdb.fake', password='1234567'
     )
 
 
@@ -26,3 +26,4 @@ def user_client(token):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {token["access"]}')
     return client
+  

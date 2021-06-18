@@ -14,6 +14,7 @@ class MyUser(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     objects = UserManager()
+    is_active = True
     first_name = models.CharField(
         max_length=100,
         verbose_name='First name',
@@ -38,6 +39,7 @@ class MyUser(AbstractUser):
         default=Roles.USER,
     )
 
+    '''
     is_superuser = models.CharField(
         max_length=20,
         null=True,
@@ -46,13 +48,15 @@ class MyUser(AbstractUser):
         max_length=20,
         null=True,
     )
-    # is_active = models.CharField(
-    # null =True
-    # )
+
+    is_active = models.CharField(
+        null =True
+    )
+
     date_joined = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата регистрации', db_index=True
     )
-
+    '''
 
 User = get_user_model()
 
