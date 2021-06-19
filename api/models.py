@@ -22,7 +22,7 @@ class MyUser(AbstractUser):
         default=False)
     date_joined = models.DateTimeField(
         default=timezone.now,
-        null = True)
+        null=True)
     first_name = models.CharField(
         max_length=100,
         verbose_name='First name',
@@ -37,7 +37,7 @@ class MyUser(AbstractUser):
         unique=True
     )
     bio = models.TextField(null=True)
-    
+
     email = models.EmailField(
         verbose_name='email',
         unique=True
@@ -55,6 +55,7 @@ class MyUser(AbstractUser):
 class ConfCode(models.Model):
     confcode = models.CharField(max_length=128)
     email = models.CharField(max_length=200)
+
 
 User = get_user_model()
 

@@ -1,8 +1,5 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-)
 
 from .views import CategoryViewSet, CommentViewSet, GenreViewSet, \
     MyTokenObtainView, ReviewViewSet, SendEmailView, TitlesViewSet, UserViewSet

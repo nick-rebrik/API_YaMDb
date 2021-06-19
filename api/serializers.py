@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 
@@ -78,6 +77,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class MyTokenObtainPairSerializer(serializers.Serializer):
     username_field = get_user_model().USERNAME_FIELD
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -93,9 +93,9 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
             authenticate_kwargs['request'] = self.context['request']
         except KeyError:
             pass
-        backend= MyBackend()
+        backend = MyBackend()
         user = backend.authenticate(**authenticate_kwargs)
-        data ={}
+        data = {}
         if user:
             refresh = RefreshToken.for_user(user)
             data['token'] = str(refresh.access_token)
@@ -104,7 +104,7 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
 
 class SendEmailSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
-    
+
     def validate_email(self, value):
         if ConfCode.objects.filter(email=value).exists():
             raise ValidationError(
