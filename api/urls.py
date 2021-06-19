@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from .views import CategoryViewSet, CommentViewSet, GenreViewSet, \
-    ReviewViewSet, SendEmailView, TitlesViewSet, UserViewSet
+    MyTokenObtainView, ReviewViewSet, SendEmailView, TitlesViewSet, UserViewSet
 
 router_v1 = DefaultRouter()
 router_v1.register("users", UserViewSet, basename='User')
@@ -25,6 +25,6 @@ urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/email/', SendEmailView.as_view(),
          name='obtain_confirmation_code'),
-    path('v1/auth/token/', TokenObtainPairView.as_view(),
+    path('v1/auth/token/', MyTokenObtainView.as_view(),
          name='obtain_token'),
 ]

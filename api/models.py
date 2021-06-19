@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 class MyUser(AbstractUser):
@@ -15,6 +16,13 @@ class MyUser(AbstractUser):
 
     objects = UserManager()
     is_active = True
+    is_superuser = models.BooleanField(
+        default=False)
+    is_staff = models.BooleanField(
+        default=False)
+    date_joined = models.DateTimeField(
+        default=timezone.now,
+        null = True)
     first_name = models.CharField(
         max_length=100,
         verbose_name='First name',
@@ -29,6 +37,7 @@ class MyUser(AbstractUser):
         unique=True
     )
     bio = models.TextField(null=True)
+    
     email = models.EmailField(
         verbose_name='email',
         unique=True
@@ -42,6 +51,10 @@ class MyUser(AbstractUser):
     class Meta:
         ordering = ['id']
 
+
+class ConfCode(models.Model):
+    confcode = models.CharField(max_length=128)
+    email = models.CharField(max_length=200)
 
 User = get_user_model()
 

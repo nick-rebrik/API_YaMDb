@@ -1,9 +1,13 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.validators import UniqueValidator
 
-from .models import Category, Comment, Genre, MyUser, Review, Title
+from .auth import MyBackend
+from .models import Category, Comment, ConfCode, Genre, MyUser, Review, Title
+
 
 User = get_user_model()
 
@@ -72,21 +76,44 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class MyTokenObtainPairSerializer(serializers.Serializer):
+    username_field = get_user_model().USERNAME_FIELD
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['password'].required = False
+
+        self.fields[self.username_field] = serializers.CharField()
         self.fields['confirmation code'] = serializers.CharField()
 
     def validate(self, attrs):
-        attrs.update({'password': attrs['confirmation code']})
-        return super().validate(attrs)
+        authenticate_kwargs = {
+            self.username_field: attrs[self.username_field],
+            'confcode': attrs['confirmation code'],
+        }
+        try:
+            authenticate_kwargs['request'] = self.context['request']
+        except KeyError:
+            pass
+        backend= MyBackend()
+        user = backend.authenticate(**authenticate_kwargs)
+        data ={}
+        if user:
+            refresh = RefreshToken.for_user(user)
+            data['token'] = str(refresh.access_token)
+        return data
 
 
 class SendEmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    
+    def validate_email(self, value):
+        if ConfCode.objects.filter(email=value).exists():
+            raise ValidationError(
+                'Вы уже получили код. Ищите в почте.'
+            )
+
     class Meta:
         fields = ('email',)
-        model = MyUser
+        model = ConfCode
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -104,4 +131,3 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         exclude = ('password',)
-        # lookup_field = 'username'

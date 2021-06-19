@@ -1,4 +1,4 @@
-# import function for password encyption
+# import function for code encyption
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -22,8 +22,8 @@ from .permissions import IsAdmin, IsAdminOrModerator, IsSafeMethodOrIsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainPairSerializer,
                           ReviewSerializer, SendEmailSerializer,
-                          TitleCreateSerializer, TitleListSerializer)
-from .serializers import (UserSerializer)
+                          TitleCreateSerializer, TitleListSerializer,
+                          UserSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -129,20 +129,20 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 
 class MyTokenObtainView(TokenViewBase):
+    permission_classes = [AllowAny]
     serializer_class = MyTokenObtainPairSerializer
 
 
 class SendEmailView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid():
             confirmation_code = MyUser.objects.make_random_password()
-
             serializer.save(
-                email=self.request.data['email'],
-                password=make_password(confirmation_code),
+                confcode=make_password(confirmation_code),
             )
-
             send_mail(
                 'Confirmation code email',
                 'confirmation code: {}'.format(confirmation_code),
@@ -158,8 +158,6 @@ class SendEmailView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
-    # filter_backends = (SearchFilter,)
-    # search_fields = ['username']
     lookup_field = "username"
     permission_classes = [IsAuthenticated, IsAdmin]
 
