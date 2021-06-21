@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -57,9 +56,6 @@ class ConfCode(models.Model):
     email = models.CharField(max_length=200)
 
 
-User = get_user_model()
-
-
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name='Жанр', unique=True)
     slug = models.SlugField(max_length=30, unique=True)
@@ -107,10 +103,13 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews'
+        MyUser, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+        validators=[
+            MinValueValidator(1, message='Минимальная оценка - 1'),
+            MaxValueValidator(10, message='Максимальная оценка - 10')
+        ]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации', db_index=True
@@ -139,7 +138,7 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
+        MyUser, on_delete=models.CASCADE, related_name='comments'
 
     )
     pub_date = models.DateTimeField(

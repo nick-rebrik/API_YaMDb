@@ -7,7 +7,6 @@ from rest_framework.validators import UniqueValidator
 from .auth import MyBackend
 from .models import Category, Comment, ConfCode, Genre, MyUser, Review, Title
 
-
 User = get_user_model()
 
 
@@ -57,6 +56,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
+
+    def validate(self, attrs):
+        if self.context['request'].method == 'POST' and (
+                Review.objects.filter(
+                    title_id=self.context['view'].kwargs['title_id'],
+                    author=self.context['request'].user
+                ).exists()
+        ):
+            raise ValidationError(
+                'Вы уже оставили отзыв на данное произведение'
+            )
+        return attrs
 
     class Meta:
         fields = ['id', 'text', 'author', 'score', 'pub_date']
