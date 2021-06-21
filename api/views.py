@@ -1,4 +1,3 @@
-# import function for code encyption
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -6,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
@@ -43,10 +41,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
-        if title.reviews.filter(author=self.request.user).exists():
-            raise ValidationError(
-                'Вы уже оставили отзыв на данное произведение'
-            )
         serializer.save(author=self.request.user, title=title)
 
 
@@ -71,7 +65,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-class CustomMixin(CreateModelMixin, ListModelMixin, DestroyModelMixin,
+class CustomMixin(CreateModelMixin,
+                  ListModelMixin,
+                  DestroyModelMixin,
                   viewsets.GenericViewSet):
     pass
 
@@ -171,13 +167,11 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(me)
             return Response(serializer.data,
                             status=status.HTTP_200_OK)
-        else:
-            serializer = self.get_serializer(me,
-                                             data=request.data, partial=True)
-            if serializer.is_valid():
-                self.perform_update(serializer)
-                return Response(serializer.data,
-                                status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(me,
+                                         data=request.data, partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            return Response(serializer.data,
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
