@@ -3,25 +3,20 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+USER='user'
+MODERATOR='moderator'
+ADMIN='admin'
+Roles = [
+    (USER,'user'),
+    (MODERATOR, 'moderator'),
+    (ADMIN,'admin'),
+]
 
 class MyUser(AbstractUser):
-    class Roles(models.TextChoices):
-        USER = 'user'
-        MODERATOR = 'moderator'
-        ADMIN = 'admin'
-
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-
-    objects = UserManager()
-    is_active = True
-    is_superuser = models.BooleanField(
-        default=False)
-    is_staff = models.BooleanField(
-        default=False)
-    date_joined = models.DateTimeField(
-        default=timezone.now,
-        null=True)
+    
     first_name = models.CharField(
         max_length=100,
         verbose_name='First name',
@@ -43,12 +38,24 @@ class MyUser(AbstractUser):
     )
     role = models.CharField(
         max_length=20,
-        choices=Roles.choices,
-        default=Roles.USER,
+        choices=Roles,
+        default=USER,
     )
+    @property
+    def is_admin(self):
+        if self.role == ADMIN: 
+            self.is_superuser=True
+        return self.is_superuser
+
+    @property
+    def is_moderator(self):
+        if self.role == MODERATOR: 
+            self.is_staff=True
+        return self.is_staff
 
     class Meta:
         ordering = ['id']
+
 
 
 class ConfCode(models.Model):
