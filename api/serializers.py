@@ -130,15 +130,21 @@ class SendEmailSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(default=None)
     last_name = serializers.CharField(default=None)
-    email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=MyUser.objects.all())]
-    )
+    email = serializers.EmailField( 
+        validators=[UniqueValidator(queryset=MyUser.objects.all())] 
+        )
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
         default='user',
         choices=Roles,
     )
-
+    def __init__(self, *args, **kwargs):
+        admin = kwargs.pop('is_admin', True)
+        super().__init__(*args, **kwargs)
+       
+        if not admin:
+            self.fields.pop('role')
+        
     class Meta:
         model = MyUser
         exclude = ('password',)

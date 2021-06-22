@@ -9,18 +9,23 @@ class IsAdmin(permissions.BasePermission):
 
 
 class IsAdminOrModerator(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission (self, request, view):
+        if request.method == 'POST':
+            return request.user.is_authenticated
         return (request.method in permissions.SAFE_METHODS
                 or (request.user.is_authenticated
                     and any([request.user.is_moderator,
                              request.user.is_admin,
-                             request.user.id == obj.author.id])))
+                             request.user.id == view.get_object().author.id]
+                            )
+                    )
+                )
 
 
 class IsSafeMethodOrIsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
         return (request.method in permissions.SAFE_METHODS
                 or request.user.is_superuser)
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.is_superuser
+    
