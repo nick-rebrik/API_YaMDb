@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 
 from .auth import MyBackend
-from .models import Category, Comment, ConfCode, Genre, MyUser, Review, Title
+from .models import Category, Comment, ConfCode, Genre, MyUser, Roles, Review, Title
 
 User = get_user_model()
 
@@ -136,7 +136,7 @@ class UserSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
         default='user',
-        choices=MyUser.Roles
+        choices=Roles,
     )
 
     class Meta:
