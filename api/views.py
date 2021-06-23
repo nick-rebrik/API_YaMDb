@@ -27,17 +27,12 @@ from .serializers import (CategorySerializer, CommentSerializer,
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
+    permission_classes = [IsAdminOrModerator, ]
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
 
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminOrModerator]
-        return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -57,13 +52,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(author=self.request.user, review=review)
 
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminOrModerator]
-        return [permission() for permission in permission_classes]
-
 
 class CustomMixin(CreateModelMixin,
                   ListModelMixin,
@@ -79,14 +67,8 @@ class CategoryViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
-        return [permission() for permission in permission_classes]
-
+    permission_classes = [IsSafeMethodOrIsAdmin,]
+    
 
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
@@ -95,13 +77,7 @@ class GenreViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
-        return [permission() for permission in permission_classes]
+    permission_classes = [IsSafeMethodOrIsAdmin,]
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -110,19 +86,13 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
+    permission_classes = [ IsSafeMethodOrIsAdmin,]
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleListSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated, IsSafeMethodOrIsAdmin]
-        return [permission() for permission in permission_classes]
-
+   
 
 class MyTokenObtainView(TokenViewBase):
     permission_classes = [AllowAny]
@@ -165,7 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
     (https://github.com/jazzband/djangorestframework-simplejwt/blob/
     a434d5bfa6e03ccdc4a6d2fff7708d32fc5cd12c/rest_framework_simplejwt/authentication.py#L118)
     '''
-    
+
     @action(detail=False,
             methods=['get', 'patch'],
             permission_classes=[IsAuthenticated],
@@ -174,10 +144,11 @@ class UserViewSet(viewsets.ModelViewSet):
         me = get_object_or_404(MyUser, id=self.request.user.id)
         if self.request.method == 'GET':
             serializer = self.get_serializer(me)
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
+            return Response(serializer.data)
         serializer = self.get_serializer(me,
-                                         data=request.data, partial=True)
+                                        data=request.data,
+                                        partial=True,
+                                        is_admin=self.request.user.is_admin)
         if serializer.is_valid():
             self.perform_update(serializer)
             return Response(serializer.data,
