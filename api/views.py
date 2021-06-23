@@ -127,14 +127,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     permission_classes = [IsAuthenticated, IsAdmin]
 
-    def perform_create(self, serializer):
-        serializer.save(is_active=True)
-    '''
-    без is_active не проходит аутентификация в последнем 
-    assert test_07_users_username_patch_auth, полагаем это вызвано:
-    (https://github.com/jazzband/djangorestframework-simplejwt/blob/
-    a434d5bfa6e03ccdc4a6d2fff7708d32fc5cd12c/rest_framework_simplejwt/authentication.py#L118)
-    '''
 
     @action(detail=False,
             methods=['get', 'patch'],

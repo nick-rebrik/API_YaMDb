@@ -147,4 +147,4 @@ class UserSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = MyUser
-        exclude = ('password',)
+        exclude = ('password', 'is_active', 'is_staff', 'is_superuser')

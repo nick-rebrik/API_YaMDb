@@ -41,18 +41,19 @@ class MyUser(AbstractUser):
         choices=Roles,
         default=USER,
     )
+   
     @property
     def is_admin(self):
         if self.role == ADMIN: 
             self.is_superuser=True
         return self.is_superuser
-
+   
     @property
     def is_moderator(self):
         if self.role == MODERATOR: 
             self.is_staff=True
         return self.is_staff
-
+    
     class Meta:
         ordering = ['id']
 
