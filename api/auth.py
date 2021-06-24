@@ -16,17 +16,8 @@ class MyBackend(BaseBackend):
             user = UserModel.objects.get(email=email)
         except UserModel.DoesNotExist:
             return
-        else:
-            try:
-                check = ConfCode.objects.get(email=email)
-            except ConfCode.DoesNotExist:
-                return
-            else:
-                # проверяем, совпадает ли зашифрованный код в базе
-                # c кодом из запроса
-                if check_password(confcode, check.confcode):
-                    return user
-        '''
+        return user
+
     def get_user(self, user_id):
         try:
             user = UserModel._default_manager.get(pk=user_id)
