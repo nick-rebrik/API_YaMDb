@@ -59,11 +59,6 @@ class MyUser(AbstractUser):
 
 
 
-class ConfCode(models.Model):
-    confcode = models.CharField(max_length=128)
-    email = models.CharField(max_length=200)
-
-
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name='Жанр', unique=True)
     slug = models.SlugField(max_length=30, unique=True)

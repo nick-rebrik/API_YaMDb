@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.tokens import default_token_generator as token
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -22,7 +22,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           ReviewSerializer, SendEmailSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserSerializer)
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
@@ -104,15 +103,14 @@ class SendEmailView(APIView):
 
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
-        if serializer.is_valid():
-            confirmation_code = MyUser.objects.make_random_password()
-            serializer.save(
-                confcode=make_password(confirmation_code),
-            )
+        if serializer.is_valid(raise_exception=True):
+            if not request.user.is_authenticated:
+                request.user.last_login, request.user.password = None, None    
+            confirmation_code = token.make_token(request.user)
             send_mail(
                 'Confirmation code email',
                 'confirmation code: {}'.format(confirmation_code),
-                'from@example.com',
+                DOMAIN_NAME, 
                 [self.request.data['email']],
                 fail_silently=False,
             )
@@ -141,7 +139,7 @@ class UserViewSet(viewsets.ModelViewSet):
                                         data=request.data,
                                         partial=True,
                                         is_admin=self.request.user.is_admin)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
             return Response(serializer.data,
                             status=status.HTTP_200_OK)
