@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 
 from .auth import MyBackend
-from .models import Category, Comment, ConfCode, Genre, MyUser, Roles, Review, Title
+from .models import Category, Comment, Genre, MyUser, Roles, Review, Title
 
 User = get_user_model()
 
@@ -115,16 +115,16 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
 
 class SendEmailSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
-
-    def validate_email(self, value):
-        if ConfCode.objects.filter(email=value).exists():
-            raise ValidationError(
-                'Вы уже получили код. Ищите в почте.'
-            )
-
-    class Meta:
-        fields = ('email',)
-        model = ConfCode
+    #
+    # def validate_email(self, value):
+    #     # if ConfCode.objects.filter(email=value).exists():
+    #         raise ValidationError(
+    #             'Вы уже получили код. Ищите в почте.'
+    #         )
+    #
+    # class Meta:
+    #     fields = ('email',)
+    #     model = ConfCode
 
 
 class UserSerializer(serializers.ModelSerializer):

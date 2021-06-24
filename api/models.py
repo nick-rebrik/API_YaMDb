@@ -1,27 +1,23 @@
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
-
 
 from .validators import validator_year
 
-
-USER='user'
-MODERATOR='moderator'
-ADMIN='admin'
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
 Roles = [
-    (USER,'user'),
+    (USER, 'user'),
     (MODERATOR, 'moderator'),
-    (ADMIN,'admin'),
+    (ADMIN, 'admin'),
 ]
 
 
 class MyUser(AbstractUser):
-    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    
+
     first_name = models.CharField(
         max_length=100,
         verbose_name='First name',
@@ -46,19 +42,19 @@ class MyUser(AbstractUser):
         choices=Roles,
         default=USER,
     )
-   
+
     @property
     def is_admin(self):
-        if self.role == ADMIN: 
-            self.is_superuser=True
+        if self.role == ADMIN:
+            self.is_superuser = True
         return self.is_superuser
-   
+
     @property
     def is_moderator(self):
-        if self.role == MODERATOR: 
-            self.is_staff=True
+        if self.role == MODERATOR:
+            self.is_staff = True
         return self.is_staff
-    
+
     class Meta:
         ordering = ['id']
 
@@ -90,7 +86,6 @@ class Category(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=100, verbose_name='Произведение')
-    year = models.IntegerField(verbose_name="Год издания", db_index=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  blank=True, null=True, related_name="titles")
     genre = models.ManyToManyField(Genre, related_name="titles")

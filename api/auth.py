@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.hashers import check_password
-from api.models import ConfCode
+
 
 UserModel = get_user_model()
 
@@ -14,16 +14,7 @@ class MyBackend(BaseBackend):
             user = UserModel.objects.get(email=email)
         except UserModel.DoesNotExist:
             return
-        else:
-            try:
-                check = ConfCode.objects.get(email=email)
-            except ConfCode.DoesNotExist:
-                return
-            else:
-                # проверяем, совпадает ли зашифрованный код в базе
-                # c кодом из запроса
-                if check_password(confcode, check.confcode):
-                    return user
+        return user
 
     def get_user(self, user_id):
         try:
