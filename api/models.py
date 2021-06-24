@@ -3,6 +3,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+
+from .validators import validator_year
+
+
 USER='user'
 MODERATOR='moderator'
 ADMIN='admin'
@@ -11,6 +15,7 @@ Roles = [
     (MODERATOR, 'moderator'),
     (ADMIN,'admin'),
 ]
+
 
 class MyUser(AbstractUser):
     
@@ -58,12 +63,6 @@ class MyUser(AbstractUser):
         ordering = ['id']
 
 
-
-class ConfCode(models.Model):
-    confcode = models.CharField(max_length=128)
-    email = models.CharField(max_length=200)
-
-
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name='Жанр', unique=True)
     slug = models.SlugField(max_length=30, unique=True)
@@ -95,6 +94,11 @@ class Title(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  blank=True, null=True, related_name="titles")
     genre = models.ManyToManyField(Genre, related_name="titles")
+    year = models.IntegerField(
+        verbose_name="Год издания", db_index=True,
+        validators=[validator_year]
+    )
+
     description = models.CharField(max_length=300, null=True)
 
     class Meta:
