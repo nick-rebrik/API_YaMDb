@@ -57,6 +57,11 @@ class MyUser(AbstractUser):
 
     class Meta:
         ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['email'],
+                name='unique_email'),
+        ]
 
 
 class Genre(models.Model):

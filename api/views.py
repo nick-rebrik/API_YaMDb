@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator as token
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -23,6 +24,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserSerializer)
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
@@ -31,7 +33,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
-
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -66,8 +67,8 @@ class CategoryViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-    permission_classes = [IsSafeMethodOrIsAdmin,]
-    
+    permission_classes = [IsSafeMethodOrIsAdmin, ]
+
 
 class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all().order_by('id')
@@ -76,7 +77,7 @@ class GenreViewSet(CustomMixin):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
     lookup_field = 'slug'
-    permission_classes = [IsSafeMethodOrIsAdmin,]
+    permission_classes = [IsSafeMethodOrIsAdmin, ]
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -85,13 +86,13 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
-    permission_classes = [ IsSafeMethodOrIsAdmin,]
+    permission_classes = [IsSafeMethodOrIsAdmin, ]
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleListSerializer
-   
+
 
 class MyTokenObtainView(TokenViewBase):
     permission_classes = [AllowAny]
@@ -104,14 +105,14 @@ class SendEmailView(APIView):
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            if not request.user.is_authenticated:
-                request.user.last_login, request.user.password = None, None    
-            confirmation_code = token.make_token(request.user)
+            email = self.request.data['email']
+            user = get_object_or_404(MyUser, email=email)
+            confirmation_code = token.make_token(user)
             send_mail(
                 'Confirmation code email',
                 'confirmation code: {}'.format(confirmation_code),
-                DOMAIN_NAME, 
-                [self.request.data['email']],
+                settings.DOMAIN_NAME,
+                [email],
                 fail_silently=False,
             )
             return Response(serializer.validated_data,
@@ -125,7 +126,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     permission_classes = [IsAuthenticated, IsAdmin]
 
-
     @action(detail=False,
             methods=['get', 'patch'],
             permission_classes=[IsAuthenticated],
@@ -136,9 +136,9 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(me)
             return Response(serializer.data)
         serializer = self.get_serializer(me,
-                                        data=request.data,
-                                        partial=True,
-                                        is_admin=self.request.user.is_admin)
+                                         data=request.data,
+                                         partial=True,
+                                         is_admin=self.request.user.is_admin)
         if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
             return Response(serializer.data,

@@ -1,5 +1,4 @@
 from rest_framework import permissions
-from .models import Roles
 
 
 class IsAdmin(permissions.BasePermission):
@@ -9,7 +8,7 @@ class IsAdmin(permissions.BasePermission):
 
 
 class IsAdminOrModerator(permissions.BasePermission):
-    def has_permission (self, request, view):
+    def has_permission(self, request, view):
         if request.method == 'POST':
             return request.user.is_authenticated
         return (request.method in permissions.SAFE_METHODS
@@ -28,4 +27,3 @@ class IsSafeMethodOrIsAdmin(permissions.BasePermission):
             return True
         return (request.method in permissions.SAFE_METHODS
                 or request.user.is_superuser)
-    

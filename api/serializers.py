@@ -5,7 +5,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 
 from .auth import MyBackend
-from .models import Category, Comment, Genre, MyUser, Roles, Review, Title
+from .models import (Category, Comment, Genre, MyUser,
+                     Roles, Review, Title, USER)
 
 User = get_user_model()
 
@@ -115,13 +116,7 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
 
 class SendEmailSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
-    '''
-    def validate_email(self, value):
-        if ConfCode.objects.filter(email=value).exists():
-            raise ValidationError(
-                'Вы уже получили код. Ищите в почте.'
-            )
-    '''
+
     class Meta:
         fields = ('email',)
         model = User
@@ -130,21 +125,25 @@ class SendEmailSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(default=None)
     last_name = serializers.CharField(default=None)
-    email = serializers.EmailField( 
-        validators=[UniqueValidator(queryset=MyUser.objects.all())] 
-        )
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=MyUser.objects.all())]
+    )
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
-        default='user',
+        default=USER,
         choices=Roles,
     )
+
     def __init__(self, *args, **kwargs):
-        admin = kwargs.pop('is_admin', True)
+        self.admin = kwargs.pop('is_admin', True)
         super().__init__(*args, **kwargs)
-       
-        if not admin:
-            self.fields.pop('role')
-        
+
+    def validate_role(self, value):
+        if not self.admin and value != USER:
+            raise ValidationError(
+                'Только администратор может изменить роль')
+        return value
+
     class Meta:
         model = MyUser
-        exclude = ('password', 'is_active', 'is_staff', 'is_superuser')
+        exclude = ('id', 'password', 'is_active', 'is_staff', 'is_superuser')

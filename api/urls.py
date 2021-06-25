@@ -18,10 +18,14 @@ router_v1.register(
     CommentViewSet, basename='Comment'
 )
 
+auth_urls = [
+    path('email/', SendEmailView.as_view(),
+         name='obtain_confirmation_code'),
+    path('token/', MyTokenObtainView.as_view(),
+         name='obtain_token'),
+]
+
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
-    path('v1/auth/email/', SendEmailView.as_view(),
-         name='obtain_confirmation_code'),
-    path('v1/auth/token/', MyTokenObtainView.as_view(),
-         name='obtain_token'),
+    path('v1/auth/', include(auth_urls)),
 ]
