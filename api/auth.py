@@ -6,7 +6,7 @@ UserModel = get_user_model()
 
 
 class MyBackend(BaseBackend):
-    def authenticate(self, request, email=None, confcode=None):
+    def authenticate(self, email=None, confcode=None):
         if email is None or confcode is None:
             return
         try:

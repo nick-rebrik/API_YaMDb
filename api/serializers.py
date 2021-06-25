@@ -93,7 +93,7 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields[self.username_field] = serializers.CharField()
+        self.fields[self.username_field] = serializers.EmailField()
         self.fields['confirmation code'] = serializers.CharField()
 
     def validate(self, attrs):
@@ -101,10 +101,6 @@ class MyTokenObtainPairSerializer(serializers.Serializer):
             self.username_field: attrs[self.username_field],
             'confcode': attrs['confirmation code'],
         }
-        try:
-            authenticate_kwargs['request'] = self.context['request']
-        except KeyError:
-            pass
         backend = MyBackend()
         user = backend.authenticate(**authenticate_kwargs)
         data = {}
@@ -128,6 +124,9 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=MyUser.objects.all())]
     )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=MyUser.objects.all())]
+    )
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
         default=USER,
@@ -145,5 +144,6 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     class Meta:
+        fields = ['first_name', 'last_name',
+                  'email', 'username', 'bio', 'role']
         model = MyUser
-        exclude = ('id', 'password', 'is_active', 'is_staff', 'is_superuser')
