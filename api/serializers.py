@@ -2,11 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.tokens import RefreshToken
 
-
-from .models import (Category, Comment, Genre, MyUser,
-                     Roles, Review, Title)
+from .models import (Category, Comment, Genre, MyUser, Review, Roles, Title)
 
 User = get_user_model()
 
@@ -59,12 +56,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, attrs):
-        if self.context['request'].method == 'POST' and (
-                Review.objects.filter(
-                    title_id=self.context['view'].kwargs['title_id'],
-                    author=self.context['request'].user
-                ).exists()
-        ):
+        if self.context['request'].method != 'POST':
+            return attrs
+        if Review.objects.filter(
+            title_id=self.context['view'].kwargs['title_id'],
+            author=self.context['request'].user
+        ).exists():
             raise ValidationError(
                 'Вы уже оставили отзыв на данное произведение'
             )
