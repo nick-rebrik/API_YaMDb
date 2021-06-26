@@ -91,9 +91,8 @@ class TokenSerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields[self.username_field] = serializers.EmailField(
-            required=True)
-        self.fields['confirmation code'] = serializers.CharField(required=True)
+        self.fields[self.username_field] = serializers.EmailField()
+        self.fields['confirmation code'] = serializers.CharField()
 
 
 class SendEmailSerializer(serializers.ModelSerializer):
