@@ -5,11 +5,11 @@ from .views import CategoryViewSet, CommentViewSet, GenreViewSet, \
     MyTokenObtainView, ReviewViewSet, SendEmailView, TitlesViewSet, UserViewSet
 
 router_v1 = DefaultRouter()
-router_v1.register("users", UserViewSet, basename='User')
+router_v1.register('users', UserViewSet, basename='User')
 
-router_v1.register("titles", TitlesViewSet, basename='Title')
-router_v1.register("genres", GenreViewSet, basename='Genre')
-router_v1.register("categories", CategoryViewSet, basename='Category')
+router_v1.register('titles', TitlesViewSet, basename='Title')
+router_v1.register('genres', GenreViewSet, basename='Genre')
+router_v1.register('categories', CategoryViewSet, basename='Category')
 router_v1.register(
     r'titles/(?P<title_id>[0-9]+)/reviews', ReviewViewSet, basename='Review'
 )

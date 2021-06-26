@@ -4,14 +4,11 @@ from django.db import models
 
 from .validators import validator_year
 
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
-Roles = [
-    (USER, 'user'),
-    (MODERATOR, 'moderator'),
-    (ADMIN, 'admin'),
-]
+
+class Roles(models.TextChoices):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
 
 
 class MyUser(AbstractUser):
@@ -32,28 +29,24 @@ class MyUser(AbstractUser):
         unique=True
     )
     bio = models.TextField(null=True)
-
     email = models.EmailField(
         verbose_name='email',
         unique=True
     )
     role = models.CharField(
         max_length=20,
-        choices=Roles,
-        default=USER,
+        choices=Roles.choices,
+        default=Roles.USER,
     )
 
     @property
     def is_admin(self):
-        if self.role == ADMIN:
-            self.is_superuser = True
-        return self.is_superuser
+        return (self.role == Roles.ADMIN or self.is_superuser
+                or self.is_staff)
 
     @property
     def is_moderator(self):
-        if self.role == MODERATOR:
-            self.is_staff = True
-        return self.is_staff
+        return self.role == Roles.MODERATOR
 
     class Meta:
         ordering = ['id']
@@ -132,9 +125,6 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
         ordering = ['id']
         constraints = [
-            models.CheckConstraint(
-                check=models.Q(score__range=(0, 10)), name='valid_rate'
-            ),
             models.UniqueConstraint(
                 fields=['title', 'author'],
                 name='unique_review'),
