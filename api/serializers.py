@@ -4,9 +4,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .auth import MyBackend
-from .models import (Category, Comment, Genre, MyUser, Review, Roles, Title,
-                     USER)
+
+from .models import (Category, Comment, Genre, MyUser,
+                     Roles, Review, Title)
 
 User = get_user_model()
 
@@ -87,27 +87,15 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-class MyTokenObtainPairSerializer(serializers.Serializer):
+class TokenSerializer(serializers.Serializer):
     username_field = get_user_model().USERNAME_FIELD
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields[self.username_field] = serializers.EmailField()
-        self.fields['confirmation code'] = serializers.CharField()
-
-    def validate(self, attrs):
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            'confcode': attrs['confirmation code'],
-        }
-        backend = MyBackend()
-        user = backend.authenticate(**authenticate_kwargs)
-        data = {}
-        if user:
-            refresh = RefreshToken.for_user(user)
-            data['token'] = str(refresh.access_token)
-        return data
+        self.fields[self.username_field] = serializers.EmailField(
+            required=True)
+        self.fields['confirmation code'] = serializers.CharField(required=True)
 
 
 class SendEmailSerializer(serializers.ModelSerializer):
@@ -129,19 +117,9 @@ class UserSerializer(serializers.ModelSerializer):
     )
     bio = serializers.CharField(default=None)
     role = serializers.ChoiceField(
-        default=USER,
+        default=Roles.USER,
         choices=Roles,
     )
-
-    def __init__(self, *args, **kwargs):
-        self.admin = kwargs.pop('is_admin', True)
-        super().__init__(*args, **kwargs)
-
-    def validate_role(self, value):
-        if not self.admin and value != USER:
-            raise ValidationError(
-                'Только администратор может изменить роль')
-        return value
 
     class Meta:
         fields = ['first_name', 'last_name',
