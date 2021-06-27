@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from .models import (Category, Comment, Genre, MyUser, Review, Roles, Title)
+from .models import Category, Comment, Genre, MyUser, Review, Roles, Title
 
 User = get_user_model()
 
@@ -103,18 +103,11 @@ class SendEmailSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(default=None)
-    last_name = serializers.CharField(default=None)
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=MyUser.objects.all())]
     )
     username = serializers.CharField(
         validators=[UniqueValidator(queryset=MyUser.objects.all())]
-    )
-    bio = serializers.CharField(default=None)
-    role = serializers.ChoiceField(
-        default=Roles.USER,
-        choices=Roles,
     )
 
     class Meta:
