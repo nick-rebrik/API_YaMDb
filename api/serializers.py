@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from .models import Category, Comment, Genre, MyUser, Review, Roles, Title
+from .models import Category, Comment, Genre, MyUser, Review, Title
 
 User = get_user_model()
 
