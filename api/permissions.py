@@ -23,7 +23,5 @@ class IsAdminOrModerator(permissions.BasePermission):
 
 class IsSafeMethodOrIsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'GET':
-            return True
         return (request.method in permissions.SAFE_METHODS
                 or request.user.is_superuser)
