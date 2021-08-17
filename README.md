@@ -1,4 +1,4 @@
-# API Yamdb
+# API YaMDb
  ***REST API for the service - databases of reviews about movies, books and music.***
 ### Description
 The YaMDb project collects user reviews of works. The works are divided into categories: "Books", "Movies", "Music". The list of categories (Category) can be expanded (for example, you can add a category "Fine Arts" or "Jewelry"). The works themselves are not stored in YaMDb, you can't watch a movie or listen to music here. Each category has works: books, movies or music. For example, in the category "Books" there may be works "Winnie the Pooh and all-all-all" and "Martian Chronicles", and in the category "Music" - the song "Davecha" by the group "Insects" and Bach's second suite. The work can be assigned a genre from the list of presets (for example, "Fairy Tale", "Rock" or "Arthouse"). Only an administrator can create new genres. Grateful or indignant readers leave a review of the works and give the work a rating (rating in the range from one to ten). From the set of scores, the average score is automatically calculated.
