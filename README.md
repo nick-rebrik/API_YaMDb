@@ -14,7 +14,7 @@ The YaMDb project collects user reviews of works. The works are divided into cat
 ### Quick start
 
 1. Install and activate the virtual environment
-2. Install all packages from [requirements.txt](https://github.com/nick-rebrik/Yatube/blob/master/requirements.txt)<br>
+2. Install all packages from [requirements.txt](https://github.com/nick-rebrik/API_YaMDb/blob/master/requirements.txt)<br>
   ```pip install -r requirements.txt```
 3. Run in command line:<br>
   ```python manage.py collectstatic```<br>
